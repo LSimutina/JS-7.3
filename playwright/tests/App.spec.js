@@ -1,22 +1,24 @@
 const { test, expect } = require("@playwright/test");
+const { email, password, invalidEmail, invalidPassword } = require("./user.js");
 
-test("test", async ({ page }) => {
-  // Go to https://netology.ru/free/management#/
-  await page.goto("https://netology.ru/free/management#/");
+test("Successful authorization", async ({ page }) => {
+  await page.goto("https://netology.ru/?modal=sign_in");
+  await expect(page).toHaveURL("https://netology.ru/?modal=sign_in");
+  await page.locator('[placeholder="Email"]').fill(email); // вводим почту
+  await page.locator('[placeholder="Пароль"]').fill(password); // вводим пароль
+  await page.click('[data-testid="login-submit-btn"]'); //нажимаем кнопку войти
+  await expect(page).toHaveURL("https://netology.ru/profile");
+  await page.screenshot({ path: "./screenshorts/success.jpg" });
+});
 
-  // Click a
-  await page.click("a");
-  await expect(page).toHaveURL("https://netology.ru/");
-
-  // Click text=Учиться бесплатно
-  await page.click("text=Учиться бесплатно");
-  await expect(page).toHaveURL("https://netology.ru/free");
-
-  page.click("text=Бизнес и управление");
-
-  // Click text=Как перенести своё дело в онлайн
-  await page.click("text=Как перенести своё дело в онлайн");
-  await expect(page).toHaveURL(
-    "https://netology.ru/programs/kak-perenesti-svoyo-delo-v-onlajn-bp"
+test("Unsuccessful authorization", async ({ page }) => {
+  await page.goto("https://netology.ru/?modal=sign_in");
+  await expect(page).toHaveURL("https://netology.ru/?modal=sign_in");
+  await page.locator('[placeholder="Email"]').fill(invalidEmail); // вводим почту
+  await page.locator('[placeholder="Пароль"]').fill(invalidPassword); // вводим пароль
+  await page.click('[data-testid="login-submit-btn"]'); //нажимаем кнопку войти
+  await expect(page.locator("[data-testid=login-error-hint]")).toHaveText(
+    "Вы ввели неправильно логин или пароль"
   );
+  await page.screenshot({ path: "./screenshorts/error.jpg" });
 });
